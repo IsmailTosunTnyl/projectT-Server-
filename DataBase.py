@@ -28,3 +28,13 @@ class DB():
             return result[0]
         else:
             return False
+
+    def cargoAdd(self,OwnerID,DriverID,ReceiverID,Type,KG,Volume,NodeID,Status,DateCargo,Price):
+        sql = "INSERT INTO tblCargo (OwnerID,DriverID,ReceiverID,Type,KG,Volume,NodeID,Status,DateCargo,Price) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        val = (OwnerID,DriverID,ReceiverID,Type,KG,Volume,NodeID,Status,DateCargo)
+        self.mycursor.execute(sql, val)
+        self.mydb.commit()
+
+    def listAllCargo(self):
+        sql = "SELECT (Type,Kg,Volume,Price) FROM tblCargo"
+        self.mycursor.execute(sql)
