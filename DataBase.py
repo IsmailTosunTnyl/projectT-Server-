@@ -1,12 +1,14 @@
 import mysql.connector
-
+from dotenv import load_dotenv
+import os
+load_dotenv()
 class DB():
 
     def __init__(self):
-        self.mydb = mysql.connector.connect(user='root', password='3131',
-                                    host='172.104.150.113',
-                                    database='CargooDB'
-        )
+        self.mydb = mysql.connector.connect(user=os.getenv('dbUser'), password=os.getenv('dbPassword'),
+                                    host=os.getenv('dbHost'),
+                                    database=os.getenv('dbDatabase'))
+        
 
         self.mycursor = self.mydb.cursor()
 
