@@ -18,3 +18,13 @@ class DB():
         val = (NationalId,Mail,Password,Name,LastName,Phone,Adress,Balance,Star)
         self.mycursor.execute(sql, val)
         self.mydb.commit()
+
+    def logIn(self,Mail,Password):
+        sql = "select * from tblUser where Mail=%s and Password=%s"
+        val = (Mail,Password)
+        self.mycursor.execute(sql, val)
+        result = self.mycursor.fetchall()
+        if result:
+            return result[0]
+        else:
+            return False
