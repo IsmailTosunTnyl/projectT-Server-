@@ -34,11 +34,12 @@ class DB():
     def cargoAdd(self,OwnerID,DriverID,ReceiverID,Type,KG,Volume,NodeID,Status,DateCargo,Price):
         self.mycursor = self.mydb.cursor()
         sql = "INSERT INTO tblCargo (OwnerID,DriverID,ReceiverID,Type,KG,Volume,NodeID,Status,DateCargo,Price) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-        val = (OwnerID,DriverID,ReceiverID,Type,KG,Volume,NodeID,Status,DateCargo)
+        val = (OwnerID,DriverID,ReceiverID,Type,KG,Volume,NodeID,Status,DateCargo,Price)
         self.mycursor.execute(sql, val)
         self.mydb.commit()
 
     def listAllCargo(self):
+
         self.mycursor = self.mydb.cursor(dictionary=True)
         sql = "SELECT Type,Kg,Volume,Price FROM tblCargo where Status='startbox'"
         self.mycursor.execute(sql)
@@ -82,3 +83,4 @@ if __name__=="__main__":
    print(db.listDriverCargo("2"))
    print(db.listOwnerCargo("1"))
    print(db.listReceiverCargo("3"))
+
