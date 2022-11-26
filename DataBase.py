@@ -36,5 +36,35 @@ class DB():
         self.mydb.commit()
 
     def listAllCargo(self):
-        sql = "SELECT (Type,Kg,Volume,Price) FROM tblCargo"
+        sql = "SELECT (Type,Kg,Volume,Price) FROM tblCargo where Status=startbox"
         self.mycursor.execute(sql)
+    
+    def listDriveCargo(self,DriverID):
+        sql = "SELECT (Type,Kg,Volume,Price) FROM tblCargo where DriverID=%s Status<>done"
+        val = (DriverID)
+        self.mycursor.execute(sql, val)
+        result = self.mycursor.fetchall()
+        if result:
+            return result
+        else:
+            return False
+    
+    def listOwnerCargo(self,OwnerID):
+        sql = "SELECT (Type,Kg,Volume,Price) FROM tblCargo where OwnerID=%s Status<>done"
+        val = (OwnerID)
+        self.mycursor.execute(sql, val)
+        result = self.mycursor.fetchall()
+        if result:
+            return result
+        else:
+            return False
+
+    def listReceiverCargo(self,ReceiverID):
+        sql = "SELECT (Type,Kg,Volume,Price) FROM tblCargo where ReceiverID=%s and Status<>done"
+        val = (ReceiverID)
+        self.mycursor.execute(sql, val)
+        result = self.mycursor.fetchall()
+        if result:
+            return result
+        else:
+            return False
