@@ -11,7 +11,7 @@ class Map():
         self.gmaps = googlemaps.Client(key=API_KEY)
 
     
-    @cache
+    
     def getDistance(self,origin,destination):
         now = datetime.now()
         directions_result = self.gmaps.directions(origin.cordinates,

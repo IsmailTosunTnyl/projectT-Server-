@@ -69,11 +69,11 @@ class NodeList(Resource):
         try:
             res = db.listAllNodes()
             if res[1]:
-                return res[1], 200
+                return {'node':res[1]}, 200
             else:
                 return "error" , 500 #check if node exist in db
-        except:
-            return "error" , 404
+        except Exception as e:
+            return e, 404
 
        
 
