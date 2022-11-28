@@ -2,6 +2,8 @@ import mysql.connector
 from dotenv import load_dotenv
 import os
 from collections import defaultdict
+from Utils import *
+
 load_dotenv()
 class DB():
 
@@ -75,6 +77,17 @@ class DB():
             return result
         else:
             return False
+
+    def listAllNodes(self):
+        self.mycursor = self.mydb.cursor(dictionary=True)
+        sql = "SELECT * FROM tblNode"
+        self.mycursor.execute(sql)
+        result = self.mycursor.fetchall()
+        nodes = []
+        for node in result:
+            nodes.append(Node(node['ID'],node['nodeName'],node['latitude'],node['longitude']))
+
+        return nodes
 
 
 if __name__=="__main__":

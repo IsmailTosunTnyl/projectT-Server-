@@ -69,7 +69,7 @@ class CargooListAll(Resource):
 api.add_resource(Signup, "/signup/<string:firstname>/<string:lastname>/<string:password>/<string:email>/<string:address>/<string:phone>/<string:nationalID>")
 api.add_resource(Login, "/login/<string:username>/<string:password>")
 api.add_resource(Cargoo, "/cargo/<string:OwnerID>/<string:DriverID>/<string:ReceiverID>/<string:Type>/<string:KG>/<string:Volume>/<string:NodeID>/<string:Status>/<string:DateCargo>/<string:Price>")
-api.add_resource(CargooListAll, "/cargo")
+api.add_resource(CargooListAll, "/cargoall")
 
 
 
