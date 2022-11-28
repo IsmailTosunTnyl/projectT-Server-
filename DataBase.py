@@ -87,7 +87,7 @@ class DB():
         for node in result:
             nodes.append(Node(node['ID'],node['nodeName'],node['latitude'],node['longitude']))
 
-        return nodes
+        return (nodes,result)
 
 
 if __name__=="__main__":

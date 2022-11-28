@@ -63,6 +63,18 @@ class CargooListAll(Resource):
             else:
                 print("error",res)
                 return res , 500 #check if user exist in db
+
+class NodeList(Resource):
+    def get(self):
+        try:
+            res = db.listAllNodes()
+            if res[1]:
+                return res[1], 200
+            else:
+                return "error" , 500 #check if node exist in db
+        except:
+            return "error" , 404
+
        
 
 
@@ -70,8 +82,9 @@ api.add_resource(Signup, "/signup/<string:firstname>/<string:lastname>/<string:p
 api.add_resource(Login, "/login/<string:username>/<string:password>")
 api.add_resource(Cargoo, "/cargo/<string:OwnerID>/<string:DriverID>/<string:ReceiverID>/<string:Type>/<string:KG>/<string:Volume>/<string:NodeID>/<string:Status>/<string:DateCargo>/<string:Price>")
 api.add_resource(CargooListAll, "/cargoall")
+api.add_resource(NodeList, "/nodeall")
 
 
 
 if __name__ == "__main__":
-    app.run("0.0.0.0",port=8080,debug=True)
+    app.run("0.0.0.0",port=80,debug=True)
