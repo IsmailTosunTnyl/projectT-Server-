@@ -33,24 +33,24 @@ class DB():
         else:
             return False
 
-    def cargoAdd(self,OwnerID,DriverID,ReceiverID,Type,KG,Volume,NodeID,Status,DateCargo,Price):
+    def cargoAdd(self,OwnerID,ReceiverID,Type,Weight,Volume,NodeID,Status,Value):
         self.mycursor = self.mydb.cursor()
-        sql = "INSERT INTO tblCargo (OwnerID,DriverID,ReceiverID,Type,KG,Volume,NodeID,Status,DateCargo,Price) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-        val = (OwnerID,DriverID,ReceiverID,Type,KG,Volume,NodeID,Status,DateCargo,Price)
+        sql = "INSERT INTO tblCargo (OwnerID,ReceiverID,Type,Weight,Volume,NodeID,Status,Value) VALUES ( %s, %s, %s, %s, %s, %s, %s, %s)"
+        val = (OwnerID,ReceiverID,Type,Weight,Volume,NodeID,Status,Value)
         self.mycursor.execute(sql, val)
         self.mydb.commit()
 
     def listAllCargo(self):
 
         self.mycursor = self.mydb.cursor(dictionary=True)
-        sql = "SELECT Type,Kg,Volume,Price FROM tblCargo where Status='startbox'"
+        sql = "SELECT ID,Type,Weight,Volume,Value FROM tblCargo where Status='startbox'"
         self.mycursor.execute(sql)
         result = self.mycursor.fetchall()
         return result
     
     def listDriverCargo(self,DriverID):
         self.mycursor = self.mydb.cursor(dictionary=True)
-        sql = "SELECT Type,Kg,Volume,Price FROM tblCargo where DriverID=%s and Status!='done'"
+        sql = "SELECT Type,Weight,Volume,Value FROM tblCargo where DriverID=%s and Status!='done'"
         val = (DriverID,)
         self.mycursor.execute(sql, val)
         result = self.mycursor.fetchall()
@@ -61,7 +61,7 @@ class DB():
     
     def listOwnerCargo(self,OwnerID):
         self.mycursor = self.mydb.cursor(dictionary=True)
-        sql = "SELECT Type,Kg,Volume,Price FROM tblCargo where OwnerID=%s and Status!='done'"
+        sql = "SELECT Type,Weight,Volume,Value FROM tblCargo where OwnerID=%s and Status!='done'"
         val = (OwnerID,)
         self.mycursor.execute(sql, val)
         result = self.mycursor.fetchall()
@@ -69,7 +69,7 @@ class DB():
 
     def listReceiverCargo(self,ReceiverID):
         self.mycursor = self.mydb.cursor(dictionary=True)
-        sql = "SELECT Type,Kg,Volume,Price FROM tblCargo where ReceiverID=%s and Status!='done'"
+        sql = "SELECT Type,Weight,Volume,Value FROM tblCargo where ReceiverID=%s and Status!='done'"
         val = (ReceiverID,)
         self.mycursor.execute(sql, val)
         result = self.mycursor.fetchall()
@@ -96,4 +96,5 @@ if __name__=="__main__":
    print(db.listDriverCargo("2"))
    print(db.listOwnerCargo("1"))
    print(db.listReceiverCargo("3"))
+   db.cargoAdd(22,22,'food',35,3535,2,'startbox',1000)
 
