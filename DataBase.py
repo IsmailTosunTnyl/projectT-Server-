@@ -98,6 +98,7 @@ class DB():
         self.mycursor.execute(sql,val)
         result = self.mycursor.fetchall()
         return result
+
     @lru_cache(maxsize=128)
     def searchNodeByID_tpl(self,nodeID):
         self.mycursor = self.mydb.cursor(dictionary=True)
@@ -106,6 +107,7 @@ class DB():
         self.mycursor.execute(sql,val)
         result = self.mycursor.fetchall()
         return result[0]
+        
     @lru_cache(maxsize=128)
     def searchNodeByID(self,nodeID):
         self.mycursor = self.mydb.cursor(dictionary=True)

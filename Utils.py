@@ -15,6 +15,9 @@ class Node:
 
     def __eq__(self, __o: object) -> bool:
         return self.ID == __o.ID
+    
+    def __dict__(self):
+        return {'ID':self.ID,'nodeName':self.nodeName,'latitude':self.latitude,'longitude':self.longitude}
 
 class Encryptions:
     def __init__(self) -> None:

@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_restful import Api, Resource
 from DataBase import DB
+import RouteFinder as rf
 
 app = Flask(__name__)
 api = Api(app)
@@ -115,12 +116,26 @@ class NodeList(Resource):
         except Exception as e:
             return e, 404
 
+class Route(Resource):
+    @login_required
+    def get(self, mail, password, sourceNodeID,destinationNodeID):
+        try:
+            route = rf.routeSearchHandler(sourceNodeID,destinationNodeID)
+            res = route.getNodes()
+        
+            if res:
+                return {'route': res}, 200
+            else:
+                return {"error":{'route error':'no possible route'}}, 500  # check if node exist in db
+        except Exception as e:
+            return {'error':{"error":str(e)+' node not valid'}}, 500
 
 api.add_resource(Signup, "/signup/<string:firstname>/<string:lastname>/<string:password>/<string:email>/<string:address>/<string:phone>/<string:nationalID>")
 api.add_resource(Login, "/login/<string:mail>/<string:password>")
 api.add_resource(Cargoo, "/cargoadd/<string:mail>/<string:password>/<string:OwnerID>/<string:ReceiverID>/<string:Type>/<string:Weight>/<string:Volume>/<string:NodeID>/<string:Status>")
 api.add_resource(CargooListAll, "/cargoall/<string:mail>/<string:password>")
 api.add_resource(NodeList, "/nodeall/<string:mail>/<string:password>")
+api.add_resource(Route, "/route/<string:mail>/<string:password>/<string:sourceNodeID>/<string:destinationNodeID>")
 
 
 if __name__ == "__main__":

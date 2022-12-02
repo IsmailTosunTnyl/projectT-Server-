@@ -34,7 +34,7 @@ class RouteSearch(SearchProblem):
         return total
 
 class routeSearchHandler():
-    def __init__(self,sourceNodeID,destinationNodeID) -> None:
+    def __init__(self,sourceNodeID,destinationNodeID):
         self.db = DataBase.DB()
         self.allnodes = self.db.listAllNodes()[:-1][0]
         self.sourceNode = self.db.searchNodeByID_tpl(sourceNodeID)
@@ -48,11 +48,22 @@ class routeSearchHandler():
         self.result = uniform_cost(self.problem, viewer=self.viewer, graph_search=True)
         self.nodes_tpl = [node[0] for node in self.result.path()]
         self.nodes_tpl.pop(0)
+
+        self.nodedict = []
         self.nodes_tpl.insert(0,self.s)
+        for i in self.nodes_tpl:
+            self.nodedict.append({'ID':i[0],'latitude':i[1],'longitude':i[2]})
+          
+        
         self.nodes = [self.db.searchNodeByID(node[0]) for node in self.nodes_tpl ]
         print(self.nodes_tpl)
         print(self.nodes)
+    
+    def getNodes(self):
+        print(self.nodedict)
+        return self.nodedict
 
 
 if __name__ == "__main__":
-    routeSearchHandler(3,10)
+    s = routeSearchHandler(3,10)
+    print(s.getNodes())
