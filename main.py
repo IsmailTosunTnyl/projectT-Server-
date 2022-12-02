@@ -11,11 +11,15 @@ db = DB()
 
 def login_required(f):
     def decorated_function(*args, **kwargs):
-        user = db.logIn(kwargs['mail'], kwargs['password'])
+        # / is a problem in the url
+        password =  kwargs['password']
+        for i in range(password.count(';')):
+            password = password.replace(';', '/')
+        user = db.logIn(kwargs['mail'], password)
         if user:
             return f(*args, **kwargs)
         else:
-            return {'error': 'login failed'}, 500
+            return {'error': {'login failed':"User not in db"}}, 500
     return decorated_function
 
 # User SignUp
@@ -28,12 +32,16 @@ class Signup(Resource):
     def post(self, firstname, lastname, password, email, address, phone, nationalID):
         print("Sigup Post: ", firstname, lastname, email,
               password, address, phone, nationalID)
+        #/ is a propblem in url
+        for i in range(password.count(';')):
+            password = password.replace(';', '/')
+        
         try:
             db.signUp(nationalID, email, password, firstname,
                       lastname, phone, address, 0, 0)
             return {"ok":{'succesfuly sign up':201}}, 201
         except Exception as e:
-            return {"error":'User Exist'}, 500
+            return {"error":{'User Exist':"nt"}}, 500
         
         
 
@@ -41,18 +49,21 @@ class Signup(Resource):
 
 
 class Login(Resource):
-    def get(self, id):
-        return {"data": ""}
+    
+    def get(self, mail, password):
+         
+        for i in range(password.count(';')):
+            password = password.replace(';', '/')
+        user = DB().logIn(mail, password)
+        if user:
+            return {"user":user}, 200
+        else:
+            return {"error":{'login failed':"User not in db"}}, 500
+        
 
-    def post(self, username, password):
-        try:
-            res = db.login(username, password)
-            if res:
-                return "ok", 200
-            else:
-                return "error", 500  # check if user exist in db
-        except:
-            return "error", 404
+    @login_required
+    def post(self, mail, password):
+        return {"ok":{"Login Succesful":mail}}, 201
 
 
 class Cargoo(Resource):
@@ -83,7 +94,7 @@ class Cargoo(Resource):
 class CargooListAll(Resource):
     @login_required
     def get(self,mail,password):
-        res = db.listAllCargo()
+        res = DB().listAllCargo()
         if res:
             print(res)
             return {"Cargos":res}, 200
@@ -106,7 +117,7 @@ class NodeList(Resource):
 
 
 api.add_resource(Signup, "/signup/<string:firstname>/<string:lastname>/<string:password>/<string:email>/<string:address>/<string:phone>/<string:nationalID>")
-api.add_resource(Login, "/login/<string:username>/<string:password>")
+api.add_resource(Login, "/login/<string:mail>/<string:password>")
 api.add_resource(Cargoo, "/cargoadd/<string:mail>/<string:password>/<string:OwnerID>/<string:ReceiverID>/<string:Type>/<string:Weight>/<string:Volume>/<string:NodeID>/<string:Status>")
 api.add_resource(CargooListAll, "/cargoall/<string:mail>/<string:password>")
 api.add_resource(NodeList, "/nodeall/<string:mail>/<string:password>")

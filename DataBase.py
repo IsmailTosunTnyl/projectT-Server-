@@ -23,7 +23,7 @@ class DB():
         self.mydb.commit()
 
     def logIn(self,Mail,Password):
-        self.mycursor = self.mydb.cursor()
+        self.mycursor = self.mydb.cursor(dictionary=True)
         sql = "select * from tblUser where Mail=%s and Password=%s"
         val = (Mail,Password)
         self.mycursor.execute(sql, val)
