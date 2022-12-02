@@ -15,7 +15,7 @@ def login_required(f):
         password =  kwargs['password']
         for i in range(password.count(';')):
             password = password.replace(';', '/')
-        user = db.logIn(kwargs['mail'], password)
+        user = DB().logIn(kwargs['mail'], password)
         if user:
             return f(*args, **kwargs)
         else:
@@ -107,7 +107,7 @@ class NodeList(Resource):
     @login_required
     def get(self, mail, password):
         try:
-            res = db.listAllNodes()
+            res = DB().listAllNodes()
             if res[1]:
                 return {'node': res[1]}, 200
             else:

@@ -3,6 +3,7 @@ import os
 import googlemaps
 from datetime import datetime
 from functools import cache
+from functools import lru_cache
 
 load_dotenv()
 class Map():
@@ -11,7 +12,7 @@ class Map():
         self.gmaps = googlemaps.Client(key=API_KEY)
 
     
-    
+    @lru_cache(maxsize=128)
     def getDistance(self,origin,destination):
         now = datetime.now()
         directions_result = self.gmaps.directions(origin.cordinates,
@@ -19,3 +20,12 @@ class Map():
                                          mode="driving",
                                          departure_time=now)
         return directions_result[0]['legs'][0]['distance']['text']
+
+    @lru_cache(maxsize=128)
+    def getDistancebyTuple(self,origin,destination):
+     now = datetime.now()
+     directions_result = self.gmaps.directions(origin,
+                                      destination,
+                                      mode="driving",
+                                      departure_time=now)
+     return directions_result[0]['legs'][0]['distance']['text']

@@ -13,6 +13,9 @@ class Node:
         self.latitude = latitude
         self.longitude = longitude
 
+    def __eq__(self, __o: object) -> bool:
+        return self.ID == __o.ID
+
 class Encryptions:
     def __init__(self) -> None:
         self.key = os.getenv('ENCRYPTION_KEY')

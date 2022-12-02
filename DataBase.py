@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 import os
 from collections import defaultdict
 from Utils import *
+from functools import lru_cache
 
 load_dotenv()
 class DB():
@@ -88,13 +89,40 @@ class DB():
             nodes.append(Node(node['ID'],node['nodeName'],node['latitude'],node['longitude']))
 
         return (nodes,result)
+    
+    @lru_cache(maxsize=128)
+    def listCargosinNodes(self,nodeID):
+        self.mycursor = self.mydb.cursor(dictionary=True)
+        sql = "SELECT * FROM tblCargo where Status='startbox' and NodeID=%s"
+        val = (nodeID,)
+        self.mycursor.execute(sql,val)
+        result = self.mycursor.fetchall()
+        return result
+    @lru_cache(maxsize=128)
+    def searchNodeByID_tpl(self,nodeID):
+        self.mycursor = self.mydb.cursor(dictionary=True)
+        sql = "SELECT * FROM tblNode where ID=%s"
+        val = (nodeID,)
+        self.mycursor.execute(sql,val)
+        result = self.mycursor.fetchall()
+        return result[0]
+    @lru_cache(maxsize=128)
+    def searchNodeByID(self,nodeID):
+        self.mycursor = self.mydb.cursor(dictionary=True)
+        sql = "SELECT * FROM tblNode where ID=%s"
+        val = (nodeID,)
+        self.mycursor.execute(sql,val)
+        result = self.mycursor.fetchall()
+        return Node(result[0]['ID'],result[0]['nodeName'],result[0]['latitude'],result[0]['longitude'])
 
 
 if __name__=="__main__":
    db = DB()
-   print(db.listAllCargo())
-   print(db.listDriverCargo("2"))
-   print(db.listOwnerCargo("1"))
-   print(db.listReceiverCargo("3"))
-   db.cargoAdd(22,22,'food',35,3535,2,'startbox',1000)
+   #print(db.listAllCargo())
+   #print(db.listDriverCargo("2"))
+   #print(db.listOwnerCargo("1"))
+   #print(db.listReceiverCargo("3"))
+   #db.cargoAdd(22,22,'food',35,3535,2,'startbox',1000)
+   print(len(db.listCargosinNodes(2)))
+   print(db.searchNodeByID_tpl(2))
 
