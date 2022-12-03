@@ -34,11 +34,11 @@ class DB():
         else:
             return False
 
-    def cargoAdd(self, OwnerID, ReceiverID, Type, Weight, Volume, NodeID, Status, Value):
+    def cargoAdd(self, OwnerID, ReceiverID, Type, Weight, Volume, NodeID,DestNodeID, Status, Value):
         self.mycursor = self.mydb.cursor()
-        sql = "INSERT INTO tblCargo (OwnerID,ReceiverID,Type,Weight,Volume,NodeID,Status,Value) VALUES ( %s, %s, %s, %s, %s, %s, %s, %s)"
+        sql = "INSERT INTO tblCargo (OwnerID,ReceiverID,Type,Weight,Volume,NodeID,destNodeID,Status,Value) VALUES ( %s, %s, %s, %s, %s, %s, %s,%s, %s)"
         val = (OwnerID, ReceiverID, Type, Weight,
-               Volume, NodeID, Status, Value)
+               Volume, NodeID, DestNodeID, Status, Value)
         self.mycursor.execute(sql, val)
         self.mydb.commit()
 
@@ -129,15 +129,84 @@ class DB():
             del i['DateCargo']
         return result
 
+    
+    def checkNodes(self,NodeID):
+        """check if node is in database Node itself use this function"""
+
+        mycursor = self.mydb.cursor(dictionary=True)
+        mycursor.execute("SELECT * FROM nodeControl WHERE NodeID = %s", (NodeID,))
+        myresult = mycursor.fetchall()
+        return myresult
+
+    def updateNodeandBox(self,NodeID,BoxID,BoxStatus):
+        mycursor = self.mydb.cursor()
+        sql = "UPDATE nodeControl SET BoxStatus = %s WHERE NodeID = %s and BoxID = %s"
+        val = (BoxStatus,NodeID,BoxID)
+        mycursor.execute(sql, val)
+        self.mydb.commit()
+
+    def searchUserbyEmail(self, Mail):
+        """Search user by email"""
+
+        self.mycursor = self.mydb.cursor(dictionary=True)
+        sql = "SELECT * FROM tblUser where Mail=%s"
+        val = (Mail,)
+        self.mycursor.execute(sql, val)
+        result = self.mycursor.fetchall()
+        return result[0]
+
+    def getCargoByID(self, ID):
+        """Get cargo by ID"""
+
+        self.mycursor = self.mydb.cursor(dictionary=True)
+        sql = "SELECT * FROM tblCargo where ID=%s"
+        val = (ID,)
+        self.mycursor.execute(sql, val)
+        result = self.mycursor.fetchall()
+        return result[0]
+
+    def getEmptyBoxes(self, NodeID):
+        """" Returns the number of empty boxes in a node """
+
+        self.mycursor = self.mydb.cursor(dictionary=True)
+        sql = "SELECT * FROM tblBoxes where NodeID=%s and BoxStatus=%s"
+        val = (NodeID,0)
+        self.mycursor.execute(sql, val)
+        result = self.mycursor.fetchall()
+        return result
+
+    def updateCargoBox(self, CargoID, BoxID):
+        """Update cargo box"""
+
+        self.mycursor = self.mydb.cursor()
+        sql = "UPDATE tblCargo SET BoxID = %s WHERE ID = %s"
+        val = (BoxID, CargoID)
+        self.mycursor.execute(sql, val)
+        self.mydb.commit()
+    
+    def updateBoxStatus(self,BoxID,BoxStatus):
+        """Update box status"""
+
+        self.mycursor = self.mydb.cursor()
+        sql = "UPDATE tblBoxes SET BoxStatus = %s WHERE ID = %s"
+        val = (BoxStatus,BoxID)
+        self.mycursor.execute(sql, val)
+        self.mydb.commit()
+
+
 
 if __name__=="__main__":
-   db = DB()
-   #print(db.listAllCargo())
-   #print(db.listDriverCargo("2"))
-   #print(db.listOwnerCargo("1"))
-   #print(db.listReceiverCargo("3"))
-   #db.cargoAdd(22,22,'food',35,3535,2,'startbox',1000)
-   #print(len(db.listCargosinNodes(2)))
-   #print(db.searchNodeByID_tpl(2))
-   print(db.searchCargobySourceIDandDestinationID(2,11))
+    db = DB()
+    #print(db.listAllCargo())
+    #print(db.listDriverCargo("2"))
+    #print(db.listOwnerCargo("1"))
+    #print(db.listReceiverCargo("3"))
+    #db.cargoAdd(22,22,'food',35,3535,2,'startbox',1000)
+    #print(len(db.listCargosinNodes(2)))
+    #print(db.searchNodeByID_tpl(2))
+    #print(db.searchCargobySourceIDandDestinationID(2,11))
+    #db.updateNode(1,1,0)
+    #print(db.searchUserbyEmail("mail60")['ID'])
+    #print(db.getCargoByID(26))
+    print(db.getEmptyBoxes(5))
 

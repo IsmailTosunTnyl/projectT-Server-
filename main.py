@@ -80,14 +80,18 @@ class Cargoo(Resource):
             return "error", 404
     #Cargoo Add
     @login_required
-    def post(self, mail,password, OwnerID, ReceiverID, Type, Weight, Volume, NodeID, Status):
-        Value = 6060 # this is a test value for price of cargo
+    def post(self, mail,password, ReceiverMail, Type, Weight, Volume, NodeID,DestNodeID, Status):
+        Value = (Weight + Volume)  # this is a test value for price of cargo
         #calculate price of cargo
 
+      
+        
         try:
+            OwnerID = db.searchUserbyEmail(mail)['ID']
+            ReceiverID = db.searchUserbyEmail(ReceiverMail)['ID']
             db.cargoAdd(OwnerID, ReceiverID, Type, Weight,
-                        Volume, NodeID, Status, Value)
-            return {"ok":{"Cargo added":201}}, 201
+                        Volume, NodeID,DestNodeID, Status, Value)
+            return {"ok":{"Cargo added":'201'}}, 201
         except Exception as e:
             return {"error",str(e)}, 500
 
@@ -131,12 +135,58 @@ class Route(Resource):
         except Exception as e:
             return {'error':{"error":str(e)+' node not valid'}}, 500
 
+
+class Node(Resource):
+
+    # node request
+    def get(self, id):
+        try:
+            res = DB().checkNodes(id)
+            if res:
+                return res, 200
+            else:
+                return "error", 500  # check if node exist in db
+        except:
+            return "error", 404
+
+# TODO Test post method : Add resources : write closeBox method
+class cargoDroptoSource(Resource):
+    @login_required
+    def post(self, mail, password, cargoID, NodeID):
+        try:
+            # check if cargo exist
+            try:
+                cargo = db.getCargoByID(cargoID)
+                if cargo['NodeID'] == NodeID:
+                    # get empty boxes in the Node
+                    boxes = db.getEmptyBoxes(NodeID)
+                    if boxes:
+                        box = boxes[0]
+                        # update cargo
+                        db.updateCargo(cargoID, box['ID'])
+                        # update box
+                        db.updateBoxStatus(box['ID'],1)
+                        # update cargo status
+                        db.updateCargoStatus(cargoID,'readyfordrop')
+                        # open box
+                        db.updateNodeandBox(NodeID,box['ID'],1)
+
+                        return {"ok":{'cargo ready for drop to start node':cargoID}}, 201
+            except Exception as e:
+                return {"error":{'cargo not found Or Else':str(e)}}, 500
+          
+        except Exception as e:
+            return {"error":str(e)}, 500
+    
+
+
 api.add_resource(Signup, "/signup/<string:firstname>/<string:lastname>/<string:password>/<string:email>/<string:address>/<string:phone>/<string:nationalID>")
 api.add_resource(Login, "/login/<string:mail>/<string:password>")
-api.add_resource(Cargoo, "/cargoadd/<string:mail>/<string:password>/<string:OwnerID>/<string:ReceiverID>/<string:Type>/<string:Weight>/<string:Volume>/<string:NodeID>/<string:Status>")
+api.add_resource(Cargoo, "/cargoadd/<string:mail>/<string:password>/<string:ReceiverMail>/<string:Type>/<string:Weight>/<string:Volume>/<string:NodeID>/<string:DestNodeID>/<string:Status>")
 api.add_resource(CargooListAll, "/cargoall/<string:mail>/<string:password>")
 api.add_resource(NodeList, "/nodeall/<string:mail>/<string:password>")
 api.add_resource(Route, "/route/<string:mail>/<string:password>/<string:sourceNodeID>/<string:destinationNodeID>")
+api.add_resource(Node, "/node/<int:id>")
 
 
 if __name__ == "__main__":
