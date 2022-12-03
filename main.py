@@ -122,9 +122,10 @@ class Route(Resource):
         try:
             route = rf.routeSearchHandler(sourceNodeID,destinationNodeID)
             res = route.getNodes()
-        
+            cargos = route.getCargos()
+            
             if res:
-                return {'route': res}, 200
+                return {'route': res,'cargos':cargos}, 200
             else:
                 return {"error":{'route error':'no possible route'}}, 500  # check if node exist in db
         except Exception as e:
