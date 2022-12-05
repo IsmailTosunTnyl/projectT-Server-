@@ -61,12 +61,14 @@ class DB():
         else:
             return False
 
-    def listOwnerCargo(self, OwnerID):
+    def listOwnerCargo(self, OwnerID, Status):
         self.mycursor = self.mydb.cursor(dictionary=True)
-        sql = "SELECT Type,Weight,Volume,Value FROM tblCargo where OwnerID=%s and Status!='done'"
-        val = (OwnerID,)
+        sql = "SELECT * FROM tblCargo where OwnerID=%s and Status = %s"
+        val = (OwnerID,Status)
         self.mycursor.execute(sql, val)
         result = self.mycursor.fetchall()
+        for i in result:
+            del i['DateCargo']
         return result
 
     def listReceiverCargo(self, ReceiverID):
@@ -193,7 +195,16 @@ class DB():
         self.mycursor.execute(sql, val)
         self.mydb.commit()
 
+    def updateCargoStatus(self, CargoID, Status):
+        """Update cargo status"""
 
+        self.mycursor = self.mydb.cursor()
+        sql = "UPDATE tblCargo SET Status = %s WHERE ID = %s"
+        val = (Status, CargoID)
+        self.mycursor.execute(sql, val)
+        self.mydb.commit()
+
+ 
 
 if __name__=="__main__":
     db = DB()
@@ -209,4 +220,5 @@ if __name__=="__main__":
     #print(db.searchUserbyEmail("mail60")['ID'])
     #print(db.getCargoByID(26))
     print(db.getEmptyBoxes(5))
+    print(db.listOwnerCargo(72,"readyforDTS"),"readyforDTS")
 
