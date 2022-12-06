@@ -13,14 +13,14 @@ db = DB()
 def login_required(f):
     def decorated_function(*args, **kwargs):
         # / is a problem in the url
-        password =  kwargs['password']
+        password = kwargs['password']
         for i in range(password.count(';')):
             password = password.replace(';', '/')
         user = DB().logIn(kwargs['mail'], password)
         if user:
             return f(*args, **kwargs)
         else:
-            return {'error': {'login failed':"User not in db"}}, 500
+            return {'error': {'login failed': "User not in db"}}, 500
     return decorated_function
 
 # User SignUp
@@ -33,42 +33,40 @@ class Signup(Resource):
     def post(self, firstname, lastname, password, email, address, phone, nationalID):
         print("Sigup Post: ", firstname, lastname, email,
               password, address, phone, nationalID)
-        #/ is a propblem in url
+        # / is a propblem in url
         for i in range(password.count(';')):
             password = password.replace(';', '/')
-        
+
         try:
             db.signUp(nationalID, email, password, firstname,
                       lastname, phone, address, 0, 0)
-            return {"ok":{'succesfuly sign up':201}}, 201
+            return {"ok": {'succesfuly sign up': 201}}, 201
         except Exception as e:
-            return {"error":{'User Exist':"nt"}}, 500
-        
-        
+            return {"error": {'User Exist': "nt"}}, 500
+
 
 # User Login
 
 
 class Login(Resource):
-    
+
     def get(self, mail, password):
-         
+
         for i in range(password.count(';')):
             password = password.replace(';', '/')
         user = DB().logIn(mail, password)
         if user:
-            return {"user":user}, 200
+            return {"user": user}, 200
         else:
-            return {"error":{'login failed':"User not in db"}}, 500
-        
+            return {"error": {'login failed': "User not in db"}}, 500
 
     @login_required
     def post(self, mail, password):
-        return {"ok":{"Login Succesful":mail}}, 201
+        return {"ok": {"Login Succesful": mail}}, 201
 
 
 class Cargoo(Resource):
-    #Cargo list
+    # Cargo list
     def get(self):
         try:
             res = db.listAllCargo()
@@ -78,34 +76,33 @@ class Cargoo(Resource):
                 return "error", 500  # check if user exist in db
         except:
             return "error", 404
-    #Cargoo Add
-    @login_required
-    def post(self, mail,password, ReceiverMail, Type, Weight, Volume, NodeID,DestNodeID, Status):
-        Value = (Weight + Volume)  # this is a test value for price of cargo
-        #calculate price of cargo
+    # Cargoo Add
 
-      
-        
+    @login_required
+    def post(self, mail, password, ReceiverMail, Type, Weight, Volume, NodeID, DestNodeID, Status):
+        Value = (Weight + Volume)  # this is a test value for price of cargo
+        # calculate price of cargo
+
         try:
             OwnerID = db.searchUserbyEmail(mail)['ID']
             ReceiverID = db.searchUserbyEmail(ReceiverMail)['ID']
             db.cargoAdd(OwnerID, ReceiverID, Type, Weight,
-                        Volume, NodeID,DestNodeID, Status, Value)
-            return {"ok":{"Cargo added":'201'}}, 201
+                        Volume, NodeID, DestNodeID, Status, Value)
+            return {"ok": {"Cargo added": '201'}}, 201
         except Exception as e:
-            return {"error",str(e)}, 500
+            return {"error", str(e)}, 500
 
 
 class CargooListAll(Resource):
     @login_required
-    def get(self,mail,password):
+    def get(self, mail, password):
         res = DB().listAllCargo()
         if res:
             print(res)
-            return {"Cargos":res}, 200
+            return {"Cargos": res}, 200
         else:
             print("error", res)
-            return {"error no cargo":res}, 500  
+            return {"error no cargo": res}, 500
 
 
 class NodeList(Resource):
@@ -120,20 +117,22 @@ class NodeList(Resource):
         except Exception as e:
             return e, 404
 
+
 class Route(Resource):
     @login_required
-    def get(self, mail, password, sourceNodeID,destinationNodeID):
+    def get(self, mail, password, sourceNodeID, destinationNodeID):
         try:
-            route = rf.routeSearchHandler(sourceNodeID,destinationNodeID)
+            route = rf.routeSearchHandler(sourceNodeID, destinationNodeID)
             res = route.getNodes()
             cargos = route.getCargos()
-            
+
             if res:
-                return {'route': res,'cargos':cargos}, 200
+                return {'route': res, 'cargos': cargos}, 200
             else:
-                return {"error":{'route error':'no possible route'}}, 500  # check if node exist in db
+                # check if node exist in db
+                return {"error": {'route error': 'no possible route'}}, 500
         except Exception as e:
-            return {'error':{"error":str(e)+' node not valid'}}, 500
+            return {'error': {"error": str(e)+' node not valid'}}, 500
 
 
 class Node(Resource):
@@ -150,23 +149,22 @@ class Node(Resource):
             return "error", 404
 
 # TODO Test post method : Add resources : write closeBox method
+
+
 class cargoDroptoSource(Resource):
     @login_required
     def get(self, mail, password, cargoID, NodeID):
-        db=DB()
+        db = DB()
         try:
             cargo = db.getCargoByID(cargoID)
             boxID = cargo['BoxID']
-            #close the box
-            db.updateNodeandBox(NodeID,boxID,2)
+            # close the box
+            db.updateNodeandBox(NodeID, boxID, 2)
 
-            db.updateCargoStatus(cargoID,'startbox')
-            return {"ok":{'Box Closed':cargoID}}, 201
+            db.updateCargoStatus(cargoID, 'startbox')
+            return {"ok": {'Box Closed': cargoID}}, 201
         except Exception as e:
-            return {"error":{"err":str(e)}}, 500
-
-            
-
+            return {"error": {"err": str(e)}}, 500
 
     @login_required
     def post(self, mail, password, cargoID, NodeID):
@@ -183,48 +181,107 @@ class cargoDroptoSource(Resource):
                         # update cargo
                         db.updateCargoBox(cargoID, box['ID'])
                         # update box
-                        db.updateBoxStatus(box['ID'],1)
+                        db.updateBoxStatus(box['ID'], 1)
                         # update cargo status
-                        db.updateCargoStatus(cargoID,'readyfordrop')
+                        db.updateCargoStatus(cargoID, 'readyfordrop')
                         # open box
-                        db.updateNodeandBox(NodeID,box['ID'],1)
+                        db.updateNodeandBox(NodeID, box['ID'], 1)
 
-                        return {"ok":{'cargo ready for drop to start node':cargoID}}, 201
+                        return {"ok": {'cargo ready for drop to start node': cargoID}}, 201
                     else:
-                        return {"error":{'no empty box':NodeID}}, 500
+                        return {"error": {'no empty box': NodeID}}, 500
                 else:
-                    return {"error":{'cargo not define for this node':{NodeID:cargo['NodeID']}}}, 500
+                    return {"error": {'cargo not define for this node': {NodeID: cargo['NodeID']}}}, 500
             except Exception as e:
-                return {"error":{'cargo not found Or Else':str(e)}}, 500
-          
-        except Exception as e:
-            return {"error":str(e)}, 500
+                return {"error": {'cargo not found Or Else': str(e)}}, 500
 
-    
-    
+        except Exception as e:
+            return {"error": str(e)}, 500
+
+
 class CargoListOwn(Resource):
     @login_required
     def get(self, mail, password):
         db = DB()
         try:
             user = db.searchUserbyEmail(mail)
-            res = db.listOwnerCargo(user['ID'],"readyforDTS")
+            res = db.listOwnerCargo(user['ID'], "readyforDTS")
             if res:
-                return {"Cargos":res}, 200
+                return {"Cargos": res}, 200
             else:
-                return {"error":{'no cargo':mail}}, 500
+                return {"error": {'no cargo': mail}}, 500
         except Exception as e:
-            return {"error":str(e)}, 500
+            return {"error": str(e)}, 500
 
-api.add_resource(Signup, "/signup/<string:firstname>/<string:lastname>/<string:password>/<string:email>/<string:address>/<string:phone>/<string:nationalID>")
+    @login_required
+    def post(self, mail, password):
+        db = DB()
+        try:
+            user = db.searchUserbyEmail(mail)
+            res = db.listReceiverCargo(user['ID'], "endbox")
+            if res:
+                return {"Cargos": res}, 200
+            else:
+                return {"error": {'no cargo': mail}}, 500
+        except Exception as e:
+            return {"error": str(e)}, 500
+
+
+class CargoTakeFromSource(Resource):
+    @login_required
+    def get(self, mail, password, cargoID, NodeID):
+        db = DB()
+        try:
+            cargo = db.getCargoByID(cargoID)
+            boxID = cargo['BoxID']
+            # close the box
+            db.updatedestNodeandBox(NodeID, boxID, 2)
+
+            db.updateCargoStatus(cargoID, 'done')
+            return {"ok": {'Box Closed': cargoID}}, 201
+        except Exception as e:
+            return {"error": {"err": str(e)}}, 500
+
+    @login_required
+    def post(self, mail, password, cargoID, NodeID):
+       
+            try:
+                db = DB()
+                cargo = db.getCargoByID(cargoID)
+                user = db.searchUserbyEmail(mail)
+                if (int(cargo['destNodeID']) == int(NodeID)) and (user['ID'] == cargo['ReceiverID']):
+
+                    boxID = cargo['BoxID']
+                    # update cargo
+                    db.updateCargoBox(cargoID, boxID)
+                    # update box
+                    db.updateBoxStatus(boxID, 0)
+                    # update cargo status
+                    db.updateCargoStatus(cargoID, 'done')
+                    # open box
+                    db.updatedestNodeandBox(NodeID, boxID, 1)
+
+                    return {"ok": {'cargo ready for Take from start node': cargoID}}, 201
+
+                else:
+                    return {"error": {'cargo not define for this node': {NodeID: cargo['NodeID']}}}, 500
+            except Exception as e:
+                return {"error": {'cargo not found Or Else': str(e)}}, 500
+
+
+
+api.add_resource(
+    Signup, "/signup/<string:firstname>/<string:lastname>/<string:password>/<string:email>/<string:address>/<string:phone>/<string:nationalID>")
 api.add_resource(Login, "/login/<string:mail>/<string:password>")
 api.add_resource(Cargoo, "/cargoadd/<string:mail>/<string:password>/<string:ReceiverMail>/<string:Type>/<string:Weight>/<string:Volume>/<string:NodeID>/<string:DestNodeID>/<string:Status>")
 api.add_resource(CargooListAll, "/cargoall/<string:mail>/<string:password>")
 api.add_resource(NodeList, "/nodeall/<string:mail>/<string:password>")
 api.add_resource(Route, "/route/<string:mail>/<string:password>/<string:sourceNodeID>/<string:destinationNodeID>")
 api.add_resource(Node, "/node/<int:id>")
-api.add_resource(cargoDroptoSource, "/cargoDTS/<string:mail>/<string:password>/<string:cargoID>/<string:NodeID>") # To close (GET) box and openforDTS (POST)
+# To close (GET) box and openforDTS (POST)
+api.add_resource(cargoDroptoSource,"/cargoDTS/<string:mail>/<string:password>/<string:cargoID>/<string:NodeID>")
 api.add_resource(CargoListOwn, "/cargoownDTS/<string:mail>/<string:password>")
+api.add_resource(CargoTakeFromSource, "/cargoTFS/<string:mail>/<string:password>/<string:cargoID>/<string:NodeID>")
 
 
 if __name__ == "__main__":

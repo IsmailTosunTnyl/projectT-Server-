@@ -72,7 +72,7 @@ class routeSearchHandler():
         
 
 if __name__ == "__main__":
-    s = routeSearchHandler(3,10)
+    s = routeSearchHandler(3,5)
     node = s.getNodes()
     cargo = s.getCargos()
     print('*************************')

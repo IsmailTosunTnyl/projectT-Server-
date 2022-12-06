@@ -71,16 +71,15 @@ class DB():
             del i['DateCargo']
         return result
 
-    def listReceiverCargo(self, ReceiverID):
+    def listReceiverCargo(self, ReceiverID, Status):
         self.mycursor = self.mydb.cursor(dictionary=True)
-        sql = "SELECT Type,Weight,Volume,Value FROM tblCargo where ReceiverID=%s and Status!='done'"
-        val = (ReceiverID,)
+        sql = "SELECT * FROM tblCargo where ReceiverID=%s and Status = %s"
+        val = (ReceiverID,Status)
         self.mycursor.execute(sql, val)
         result = self.mycursor.fetchall()
-        if result:
-            return result
-        else:
-            return False
+        for i in result:
+            del i['DateCargo']
+        return result
 
     def listAllNodes(self):
         self.mycursor = self.mydb.cursor(dictionary=True)
@@ -123,8 +122,8 @@ class DB():
     
     def searchCargobySourceIDandDestinationID(self, SourceID, DestinationID):
         self.mycursor = self.mydb.cursor(dictionary=True)
-        sql = "SELECT * FROM tblCargo where NodeID=%s and destNodeID=%s"
-        val = (SourceID, DestinationID)
+        sql = "SELECT * FROM tblCargo where NodeID=%s and destNodeID=%s and Status=%s"
+        val = (SourceID, DestinationID,"startbox")
         self.mycursor.execute(sql, val)
         result = self.mycursor.fetchall()
         for i in result:
@@ -136,13 +135,20 @@ class DB():
         """check if node is in database Node itself use this function"""
 
         mycursor = self.mydb.cursor(dictionary=True)
-        mycursor.execute("SELECT * FROM nodeControl WHERE NodeID = %s", (NodeID,))
+        mycursor.execute("SELECT * FROM nodeControl WHERE NodeID = %s or destNodeID=%s", (NodeID,NodeID))
         myresult = mycursor.fetchall()
         return myresult
 
     def updateNodeandBox(self,NodeID,BoxID,BoxStatus):
         mycursor = self.mydb.cursor()
         sql = "UPDATE nodeControl SET BoxStatus = %s WHERE NodeID = %s and BoxID = %s"
+        val = (BoxStatus,NodeID,BoxID)
+        mycursor.execute(sql, val)
+        self.mydb.commit()
+
+    def updatedestNodeandBox(self,NodeID,BoxID,BoxStatus):
+        mycursor = self.mydb.cursor()
+        sql = "UPDATE nodeControl SET BoxStatus = %s WHERE destNodeID = %s and BoxID = %s"
         val = (BoxStatus,NodeID,BoxID)
         mycursor.execute(sql, val)
         self.mydb.commit()
@@ -219,6 +225,6 @@ if __name__=="__main__":
     #db.updateNode(1,1,0)
     #print(db.searchUserbyEmail("mail60")['ID'])
     #print(db.getCargoByID(26))
-    print(db.getEmptyBoxes(5))
-    print(db.listOwnerCargo(72,"readyforDTS"),"readyforDTS")
-
+    #print(db.getEmptyBoxes(5))
+    #print(db.listOwnerCargo(72,"readyforDTS"),"readyforDTS")
+    print(db.checkNodes(3))
