@@ -128,6 +128,7 @@ class DB():
         result = self.mycursor.fetchall()
         for i in result:
             del i['DateCargo']
+        
         return result
 
     
@@ -221,10 +222,10 @@ if __name__=="__main__":
     #db.cargoAdd(22,22,'food',35,3535,2,'startbox',1000)
     #print(len(db.listCargosinNodes(2)))
     #print(db.searchNodeByID_tpl(2))
-    #print(db.searchCargobySourceIDandDestinationID(2,11))
+    print(db.searchCargobySourceIDandDestinationID(4,2))
     #db.updateNode(1,1,0)
     #print(db.searchUserbyEmail("mail60")['ID'])
     #print(db.getCargoByID(26))
     #print(db.getEmptyBoxes(5))
     #print(db.listOwnerCargo(72,"readyforDTS"),"readyforDTS")
-    print(db.checkNodes(3))
+    #print(db.checkNodes(3))

@@ -122,12 +122,16 @@ class Route(Resource):
     @login_required
     def get(self, mail, password, sourceNodeID, destinationNodeID):
         try:
+            db=DB()
             route = rf.routeSearchHandler(sourceNodeID, destinationNodeID)
             res = route.getNodes()
             cargos = route.getCargos()
+            nodes =[]
+            for i in res:
+                nodes.append(db.searchNodeByID_tpl(i['ID']))
 
             if res:
-                return {'route': res, 'cargos': cargos}, 200
+                return {'nodes': nodes, 'cargos': cargos}, 200
             else:
                 # check if node exist in db
                 return {"error": {'route error': 'no possible route'}}, 500

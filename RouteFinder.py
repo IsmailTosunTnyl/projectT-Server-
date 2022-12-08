@@ -2,6 +2,7 @@ import DataBase
 import Map
 from simpleai.search import SearchProblem, breadth_first, depth_first, uniform_cost, limited_depth_first, iterative_limited_depth_first
 from simpleai.search.viewers import WebViewer, ConsoleViewer, BaseViewer
+import math as Math
 
 class RouteSearch(SearchProblem):
     def __init__(self, initial_state, goal, all):
@@ -10,6 +11,8 @@ class RouteSearch(SearchProblem):
         self.all = all
         self.initial_state = initial_state
         self.db = DataBase.DB()
+        #later
+        #self.main_distnce = float(self.map.getDistancebyTuple((self.initial_state[1],self.initial_state[2]) ,(self.goal[1],self.goal[2]))[:-2])
 
     def actions(self, state):
         actions = self.all
@@ -24,13 +27,20 @@ class RouteSearch(SearchProblem):
     def cost(self, state, action, state2):
         gain = self.cargoValue(state,state2)
         distance = float(self.map.getDistancebyTuple((state[1],state[2]) ,(state2[1],state2[2]))[:-2])
-        return distance - (gain*1.5)
+        return distance - (gain*2.5)
 
     def cargoValue(self,state,state2):
+        data2 = []
+        if not state2.__eq__(self.goal):
+            data2 = self.db.searchCargobySourceIDandDestinationID(state2[0],self.goal[0])
         data = self.db.searchCargobySourceIDandDestinationID(state[0],state2[0])
+        data.extend(data2)
+        
         total = 0
         for cargo in data:
             total += cargo['Value']
+
+        
         return total
 
 class routeSearchHandler():
@@ -56,6 +66,7 @@ class routeSearchHandler():
           
         
         self.nodes = [self.db.searchNodeByID(node[0]) for node in self.nodes_tpl ]
+        print('Nod_tpl ',self.nodes_tpl)
         
     
     def getNodes(self):
@@ -63,16 +74,26 @@ class routeSearchHandler():
         return self.nodedict
 
     def getCargos(self):
+        db=DataBase.DB()
         cargos = []
         for i in range(len(self.nodes_tpl)-1):
-            cargos.append((self.db.searchCargobySourceIDandDestinationID(self.nodes_tpl[i][0],self.nodes_tpl[i+1][0])))
+            
+            if (i+1) == self.destinationNode['ID']:
+                cargos.append((db.searchCargobySourceIDandDestinationID(self.nodes_tpl[i][0],self.nodes_tpl[i+1][0])))
+            cargos.append((db.searchCargobySourceIDandDestinationID(self.nodes_tpl[i][0],self.destinationNode['ID'])))
 
+
+        print('cargos ',cargos)
+
+        cargos_all = []
+        for i in cargos:
+            cargos_all.extend(i)
        
-        return cargos[0]
+        return cargos_all
         
 
 if __name__ == "__main__":
-    s = routeSearchHandler(3,5)
+    s = routeSearchHandler(3,20)
     node = s.getNodes()
     cargo = s.getCargos()
     print('*************************')
