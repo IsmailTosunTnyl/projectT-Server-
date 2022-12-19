@@ -122,11 +122,11 @@ class Route(Resource):
     @login_required
     def get(self, mail, password, sourceNodeID, destinationNodeID):
         try:
-            db=DB()
+            db = DB()
             route = rf.routeSearchHandler(sourceNodeID, destinationNodeID)
             res = route.getNodes()
             cargos = route.getCargos()
-            nodes =[]
+            nodes = []
             for i in res:
                 nodes.append(db.searchNodeByID_tpl(i['ID']))
 
@@ -248,30 +248,29 @@ class CargoTakeFromSource(Resource):
 
     @login_required
     def post(self, mail, password, cargoID, NodeID):
-       
-            try:
-                db = DB()
-                cargo = db.getCargoByID(cargoID)
-                user = db.searchUserbyEmail(mail)
-                if (int(cargo['destNodeID']) == int(NodeID)) and (user['ID'] == cargo['ReceiverID']):
 
-                    boxID = cargo['BoxID']
-                    # update cargo
-                    db.updateCargoBox(cargoID, boxID)
-                    # update box
-                    db.updateBoxStatus(boxID, 0)
-                    # update cargo status
-                    db.updateCargoStatus(cargoID, 'done')
-                    # open box
-                    db.updatedestNodeandBox(NodeID, boxID, 1)
+        try:
+            db = DB()
+            cargo = db.getCargoByID(cargoID)
+            user = db.searchUserbyEmail(mail)
+            if (int(cargo['destNodeID']) == int(NodeID)) and (user['ID'] == cargo['ReceiverID']):
 
-                    return {"ok": {'cargo ready for Take from start node': cargoID}}, 201
+                boxID = cargo['BoxID']
+                # update cargo
+                db.updateCargoBox(cargoID, boxID)
+                # update box
+                db.updateBoxStatus(boxID, 0)
+                # update cargo status
+                db.updateCargoStatus(cargoID, 'done')
+                # open box
+                db.updatedestNodeandBox(NodeID, boxID, 1)
 
-                else:
-                    return {"error": {'cargo not define for this node': {NodeID: cargo['NodeID']}}}, 500
-            except Exception as e:
-                return {"error": {'cargo not found Or Else': str(e)}}, 500
+                return {"ok": {'cargo ready for Take from start node': cargoID}}, 201
 
+            else:
+                return {"error": {'cargo not define for this node': {NodeID: cargo['NodeID']}}}, 500
+        except Exception as e:
+            return {"error": {'cargo not found Or Else': str(e)}}, 500
 
 
 api.add_resource(
@@ -280,12 +279,15 @@ api.add_resource(Login, "/login/<string:mail>/<string:password>")
 api.add_resource(Cargoo, "/cargoadd/<string:mail>/<string:password>/<string:ReceiverMail>/<string:Type>/<string:Weight>/<string:Volume>/<string:NodeID>/<string:DestNodeID>/<string:Status>")
 api.add_resource(CargooListAll, "/cargoall/<string:mail>/<string:password>")
 api.add_resource(NodeList, "/nodeall/<string:mail>/<string:password>")
-api.add_resource(Route, "/route/<string:mail>/<string:password>/<string:sourceNodeID>/<string:destinationNodeID>")
+api.add_resource(
+    Route, "/route/<string:mail>/<string:password>/<string:sourceNodeID>/<string:destinationNodeID>")
 api.add_resource(Node, "/node/<int:id>")
 # To close (GET) box and openforDTS (POST)
-api.add_resource(cargoDroptoSource,"/cargoDTS/<string:mail>/<string:password>/<string:cargoID>/<string:NodeID>")
+api.add_resource(cargoDroptoSource,
+                 "/cargoDTS/<string:mail>/<string:password>/<string:cargoID>/<string:NodeID>")
 api.add_resource(CargoListOwn, "/cargoownDTS/<string:mail>/<string:password>")
-api.add_resource(CargoTakeFromSource, "/cargoTFS/<string:mail>/<string:password>/<string:cargoID>/<string:NodeID>")
+api.add_resource(CargoTakeFromSource,
+                 "/cargoTFS/<string:mail>/<string:password>/<string:cargoID>/<string:NodeID>")
 
 
 if __name__ == "__main__":
