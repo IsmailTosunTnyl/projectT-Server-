@@ -90,7 +90,7 @@ class Cargoo(Resource):
                         Volume, NodeID, DestNodeID, Status, Value)
             return {"ok": {"Cargo added": '201'}}, 201
         except Exception as e:
-            return {"error", str(e)}, 500
+            return {"error", {"Cargo added": str(e)}}, 500
 
 
 class CargooListAll(Resource):
@@ -272,6 +272,10 @@ class CargoTakeFromSource(Resource):
         except Exception as e:
             return {"error": {'cargo not found Or Else': str(e)}}, 500
 
+
+
+
+
 class SelectedCargos(Resource):
     @login_required
     def post(self, mail, password,cargos):
@@ -280,13 +284,110 @@ class SelectedCargos(Resource):
         #db.getCargoByID(data['cargoID'])
         user = db.searchUserbyEmail(mail)
         for cargoID in data:
-            db.updateCargoStatus(cargoID, 'readyfordrop')
+            db.updateCargoStatus(cargoID, 'readyfordriver')
             db.updateDriverID(cargoID, user['ID'])
         
         
         print("-----------------")
         return {"ok": data}, 201
 
+class listDriverCargos(Resource):
+    @login_required
+    def get(self, mail, password):
+        db = DB()
+        try:
+            user = db.searchUserbyEmail(mail)
+            res = db.getCargobyDriverID(user['ID'],"readyfordriver")
+            if res:
+                return {"Cargos": res}, 200
+            else:
+                return {"error": {'no cargo': user}}, 500
+        except Exception as e:
+            return {"error": str(e)}, 500
+    
+    @login_required
+    def post(self, mail, password):
+        db = DB()
+        try:
+            user = db.searchUserbyEmail(mail)
+            res = db.getCargobyDriverID(user['ID'], "transporting")
+            if res:
+                return {"Cargos": res}, 200
+            else:
+                return {"error": {'no cargo': user}}, 500
+        except Exception as e:
+            return {"error": str(e)}, 500
+        
+class driverTakeCargo(Resource):
+    @login_required
+    def get(self, mail, password, cargoID, NodeID):
+        db = DB()
+        try:
+            user = db.searchUserbyEmail(mail)
+            cargo = db.getCargoByID(cargoID)
+            boxID = cargo['BoxID']
+            if (user['ID'] == cargo['DriverID']):
+                db.updateNodeandBox(NodeID, boxID, 1)
+                db.updateCargoStatus(cargoID, 'transporting')
+                # update box
+                db.updateBoxStatus(boxID, 0)
+                return {"ok": {'Box Opened': boxID}}, 201
+        except Exception as e:
+            return {"error": {"err": str(e)}}, 500
+        
+    @login_required
+    def post(self, mail, password, cargoID, NodeID):
+        db = DB()
+        try:
+            user = db.searchUserbyEmail(mail)
+            cargo = db.getCargoByID(cargoID)
+            boxID = cargo['BoxID']
+            if (user['ID'] == cargo['DriverID']):
+                db.updateNodeandBox(NodeID, boxID, 2)
+                db.updateCargoStatus(cargoID, 'transporting')
+                # update box
+                db.updateBoxStatus(boxID, 0)
+                return {"ok": {'Box closed': boxID}}, 201
+        except Exception as e:
+            return {"error": {"err": str(e)}}, 500
+
+
+class driverDropCargo(Resource):
+    @login_required
+    def get(self, mail, password, cargoID, NodeID):
+        db = DB()
+        try:
+            user = db.searchUserbyEmail(mail)
+            cargo = db.getCargoByID(cargoID)
+            boxID = cargo['BoxID']
+            if (user['ID'] == cargo['DriverID']):
+                db.updateNodeandBox(NodeID, boxID, 1,True)
+                #db.updateCargoStatus(cargoID, 'endbox')
+                # update box
+                db.updateBoxStatus(boxID, 0)
+                return {"ok": {'Box Opened': boxID}}, 201
+        except Exception as e:
+            return {"error": {"err": str(e)}}, 500
+        
+    @login_required
+    def post(self, mail, password, cargoID, NodeID):
+        db = DB()
+        try:
+            user = db.searchUserbyEmail(mail)
+            cargo = db.getCargoByID(cargoID)
+            boxID = cargo['BoxID']
+            if (user['ID'] == cargo['DriverID']):
+                db.updateNodeandBox(NodeID, boxID, 2,True)
+                db.updateCargoStatus(cargoID, 'endbox')
+                # update box
+                db.updateBoxStatus(boxID, 0)
+                return {"ok": {'Box closed': boxID}}, 201
+        except Exception as e:
+            return {"error": {"err": str(e)}}, 500
+        
+                
+                
+            
 
 api.add_resource(
     Signup, "/signup/<string:firstname>/<string:lastname>/<string:password>/<string:email>/<string:address>/<string:phone>/<string:nationalID>")
@@ -304,7 +405,9 @@ api.add_resource(CargoListOwn, "/cargoownDTS/<string:mail>/<string:password>")
 api.add_resource(CargoTakeFromSource,
                  "/cargoTFS/<string:mail>/<string:password>/<string:cargoID>/<string:NodeID>")
 api.add_resource(SelectedCargos, "/selectedcargos/<string:mail>/<string:password>/<string:cargos>")
-
+api.add_resource(listDriverCargos, "/listDriverCargos/<string:mail>/<string:password>")
+api.add_resource(driverTakeCargo, "/driverTakeCargo/<string:mail>/<string:password>/<string:cargoID>/<string:NodeID>")
+api.add_resource(driverDropCargo, "/driverDropCargo/<string:mail>/<string:password>/<string:cargoID>/<string:NodeID>")
 
 if __name__ == "__main__":
     app.run("0.0.0.0", port=80, debug=True)

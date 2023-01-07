@@ -140,9 +140,15 @@ class DB():
         myresult = mycursor.fetchall()
         return myresult
 
-    def updateNodeandBox(self,NodeID,BoxID,BoxStatus):
+    def updateNodeandBox(self,NodeID,BoxID,BoxStatus,isdestNode=False):
+        if isdestNode:
+            sql = "UPDATE nodeControl SET BoxStatus = %s WHERE destNodeID = %s and BoxID = %s"
+        else:
+            sql = "UPDATE nodeControl SET BoxStatus = %s WHERE NodeID = %s and BoxID = %s"
+        print("updateNodeandBox")
+        print('NodeID: ',NodeID,'BoxID: ',BoxID,'BoxStatus: ',BoxStatus)
+        
         mycursor = self.mydb.cursor()
-        sql = "UPDATE nodeControl SET BoxStatus = %s WHERE NodeID = %s and BoxID = %s"
         val = (BoxStatus,NodeID,BoxID)
         mycursor.execute(sql, val)
         self.mydb.commit()
@@ -220,6 +226,29 @@ class DB():
         val = (DriverID, CargoID)
         self.mycursor.execute(sql, val)
         self.mydb.commit()
+    
+    def getCargobyReceiverID(self, ReceiverID):
+        """Get cargo by receiver ID"""
+
+        self.mycursor = self.mydb.cursor(dictionary=True)
+        sql = "SELECT * FROM tblCargo where ReceiverID=%s and Status=%s"
+        val = (ReceiverID,"endbox")
+        self.mycursor.execute(sql, val)
+        result = self.mycursor.fetchall()
+        return result
+    
+    def getCargobyDriverID(self, DriverID,status):
+        """Get cargo by driver ID"""
+
+        self.mycursor = self.mydb.cursor(dictionary=True)
+        sql = "SELECT * FROM tblCargo where DriverID=%s and Status=%s"
+        val = (DriverID,status)
+        self.mycursor.execute(sql, val)
+        result = self.mycursor.fetchall()
+        for i in result:
+            del i['DateCargo']
+        print('Cargo: ',result)
+        return result
 
  
 
@@ -232,10 +261,12 @@ if __name__=="__main__":
     #db.cargoAdd(22,22,'food',35,3535,2,'startbox',1000)
     #print(len(db.listCargosinNodes(2)))
     #print(db.searchNodeByID_tpl(2))
-    print(db.searchCargobySourceIDandDestinationID(3,20))
+    #print(db.searchCargobySourceIDandDestinationID(3,20))
     #db.updateNode(1,1,0)
     #print(db.searchUserbyEmail("mail60")['ID'])
     #print(db.getCargoByID(26))
     #print(db.getEmptyBoxes(5))
     #print(db.listOwnerCargo(72,"readyforDTS"),"readyforDTS")
     #print(db.checkNodes(3))
+    #print(db.getCargobyDriverID(72,"transporting"))
+    print(db.updatedestNodeandBox(3,1,2))
