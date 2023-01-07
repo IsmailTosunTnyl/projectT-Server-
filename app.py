@@ -2,6 +2,7 @@ from flask import Flask, request
 from flask_restful import Api, Resource
 from DataBase import DB
 import RouteFinder as rf
+import RouteFinderV2 
 
 app = Flask(__name__)
 api = Api(app)
@@ -121,14 +122,16 @@ class NodeList(Resource):
 class Route(Resource):
     @login_required
     def get(self, mail, password, sourceNodeID, destinationNodeID):
+        rf2 = RouteFinderV2.RouteFinderV2(sourceNodeID, destinationNodeID)
         try:
             db = DB()
-            route = rf.routeSearchHandler(sourceNodeID, destinationNodeID)
-            res = route.getNodes()
-            cargos = route.getCargos()
+
+            rf2.get_route()
+            res = rf2.route
+            cargos = rf2.get_cargos()
             nodes = []
             for i in res:
-                nodes.append(db.searchNodeByID_tpl(i['ID']))
+                nodes.append(db.searchNodeByID_tpl(i[1]))
 
             if res:
                 return {'nodes': nodes, 'cargos': cargos}, 200

@@ -1,6 +1,6 @@
 import DataBase
 import Map
-from simpleai.search import SearchProblem, breadth_first, depth_first, uniform_cost, limited_depth_first, iterative_limited_depth_first
+from simpleai.search import SearchProblem, breadth_first, depth_first, uniform_cost, limited_depth_first, iterative_limited_depth_first,astar
 from simpleai.search.viewers import WebViewer, ConsoleViewer, BaseViewer
 import math as Math
 
@@ -11,6 +11,7 @@ class RouteSearch(SearchProblem):
         self.all = all
         self.initial_state = initial_state
         self.db = DataBase.DB()
+        wisited = []
         #later
         #self.main_distnce = float(self.map.getDistancebyTuple((self.initial_state[1],self.initial_state[2]) ,(self.goal[1],self.goal[2]))[:-2])
 
@@ -25,8 +26,26 @@ class RouteSearch(SearchProblem):
         return state.__eq__(self.goal)
 
     def cost(self, state, action, state2):
+        print("\n",state,state2,"\n")
+        if state.__eq__(self.initial_state) and state2.__eq__(self.goal):
+            return 0
+        
         gain = self.cargoValue(state,state2)
-        distance = float(self.map.getDistancebyTuple((state[1],state[2]) ,(state2[1],state2[2]))[:-2])
+        waypoins = []
+        if state.__eq__(self.initial_state):
+            source = (state[1],state[2])
+        else:
+            source = (self.initial_state[1],self.initial_state[2])
+            waypoins.append((state[1],state[2]))
+            
+        if state2.__eq__(self.goal):
+            destination = (state2[1],state2[2])
+        else:
+            destination = (self.goal[1],self.goal[2])
+            waypoins.append((state2[1],state2[2]))
+        
+        #distance = float(self.map.getDistancebyTuple((state[1],state[2]) ,(state2[1],state2[2]))[:-2])
+        distance = float(self.map.getDistanceWaypoint(source,destination,waypoins))
         return distance - (gain*2.5)
 
     def cargoValue(self,state,state2):
@@ -40,13 +59,14 @@ class RouteSearch(SearchProblem):
         for cargo in data:
             total += cargo['Value']
 
-        
+        print('total ',total)
         return total
 
 class routeSearchHandler():
     def __init__(self,sourceNodeID,destinationNodeID):
         self.db = DataBase.DB()
         self.allnodes = self.db.listAllNodes()[:-1][0]
+        print('allnodes ',self.allnodes)
         self.sourceNode = self.db.searchNodeByID_tpl(sourceNodeID)
         self.destinationNode = self.db.searchNodeByID_tpl(destinationNodeID)
 
@@ -75,6 +95,7 @@ class routeSearchHandler():
 
     def getCargos(self):
         db=DataBase.DB()
+        
         cargos = []
         for i in range(len(self.nodes_tpl)-1):
             
@@ -95,14 +116,18 @@ class routeSearchHandler():
 if __name__ == "__main__":
     s = routeSearchHandler(3,20)
     node = s.getNodes()
+    print(node)
+    print('--------------------------------')
+    print()
     cargo = s.getCargos()
-    print('*************************')
+    print(cargo)
+"""    print('*************************')
     for i in node:
         print(i)
     print('--------------------------------')
-   
+    print('len ',len(cargo))
     for i in cargo:
-        print(i)
+        print(i)"""
 
 
 
