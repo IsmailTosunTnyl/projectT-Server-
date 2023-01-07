@@ -105,7 +105,7 @@ class DB():
     @cache
     def searchNodeByID_tpl(self,nodeID):
         self.mycursor = self.mydb.cursor(dictionary=True)
-        sql = "SELECT * FROM tblNode where ID=%s"
+        sql = "SELECT * FROM tblNode where ID=%s "
         val = (nodeID,)
         self.mycursor.execute(sql,val)
         result = self.mycursor.fetchall()
@@ -122,7 +122,7 @@ class DB():
     
     def searchCargobySourceIDandDestinationID(self, SourceID, DestinationID):
         self.mycursor = self.mydb.cursor(dictionary=True)
-        sql = "SELECT * FROM tblCargo where NodeID=%s and destNodeID=%s and Status=%s"
+        sql = "SELECT * FROM tblCargo where NodeID=%s and destNodeID=%s and Status=%s and DriverID = 0"
         val = (SourceID, DestinationID,"startbox")
         self.mycursor.execute(sql, val)
         result = self.mycursor.fetchall()
@@ -172,6 +172,7 @@ class DB():
         val = (ID,)
         self.mycursor.execute(sql, val)
         result = self.mycursor.fetchall()
+        print('Cargo: ',result)
         return result[0]
 
     def getEmptyBoxes(self, NodeID):
@@ -210,6 +211,15 @@ class DB():
         val = (Status, CargoID)
         self.mycursor.execute(sql, val)
         self.mydb.commit()
+    
+    def updateDriverID(self, CargoID, DriverID):
+        """Update driver ID"""
+
+        self.mycursor = self.mydb.cursor()
+        sql = "UPDATE tblCargo SET DriverID = %s WHERE ID = %s"
+        val = (DriverID, CargoID)
+        self.mycursor.execute(sql, val)
+        self.mydb.commit()
 
  
 
@@ -222,7 +232,7 @@ if __name__=="__main__":
     #db.cargoAdd(22,22,'food',35,3535,2,'startbox',1000)
     #print(len(db.listCargosinNodes(2)))
     #print(db.searchNodeByID_tpl(2))
-    print(db.searchCargobySourceIDandDestinationID(4,2))
+    print(db.searchCargobySourceIDandDestinationID(3,20))
     #db.updateNode(1,1,0)
     #print(db.searchUserbyEmail("mail60")['ID'])
     #print(db.getCargoByID(26))

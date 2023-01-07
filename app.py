@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request
 from flask_restful import Api, Resource
 from DataBase import DB
 import RouteFinder as rf
@@ -272,6 +272,21 @@ class CargoTakeFromSource(Resource):
         except Exception as e:
             return {"error": {'cargo not found Or Else': str(e)}}, 500
 
+class SelectedCargos(Resource):
+    @login_required
+    def post(self, mail, password,cargos):
+       # get json data which sended from client
+        data = cargos.split('/')[-1].split('-')[:-1]
+        #db.getCargoByID(data['cargoID'])
+        user = db.searchUserbyEmail(mail)
+        for cargoID in data:
+            db.updateCargoStatus(cargoID, 'readyfordrop')
+            db.updateDriverID(cargoID, user['ID'])
+        
+        
+        print("-----------------")
+        return {"ok": data}, 201
+
 
 api.add_resource(
     Signup, "/signup/<string:firstname>/<string:lastname>/<string:password>/<string:email>/<string:address>/<string:phone>/<string:nationalID>")
@@ -288,6 +303,7 @@ api.add_resource(cargoDroptoSource,
 api.add_resource(CargoListOwn, "/cargoownDTS/<string:mail>/<string:password>")
 api.add_resource(CargoTakeFromSource,
                  "/cargoTFS/<string:mail>/<string:password>/<string:cargoID>/<string:NodeID>")
+api.add_resource(SelectedCargos, "/selectedcargos/<string:mail>/<string:password>/<string:cargos>")
 
 
 if __name__ == "__main__":
