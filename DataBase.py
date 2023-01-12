@@ -45,9 +45,11 @@ class DB():
     def listAllCargo(self):
 
         self.mycursor = self.mydb.cursor(dictionary=True)
-        sql = "SELECT ID,Type,Weight,Volume,Value FROM tblCargo where Status='startbox'"
+        sql = "SELECT * FROM tblCargo where Status='startbox'"
         self.mycursor.execute(sql)
         result = self.mycursor.fetchall()
+        for i in result:
+            del i['DateCargo']
         return result
 
     def listDriverCargo(self, DriverID):
