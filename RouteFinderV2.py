@@ -57,12 +57,18 @@ class RouteFinderV2:
                     print("Distance between",self.sourceNode.nodeName,"and",self.destNode.nodeName,"with waypoints",self.allnodes[node1].nodeName,"and",self.allnodes[node2].nodeName,"is",distance,"Reward:",reward)
                     print("Value:",val)
                     self.route.append((val,self.allnodes[node1].ID,self.allnodes[node2].ID))
-        self.route = set(self.route)
+        self.route = list(set(self.route))
            
     def get_route(self):
         self.callculate_route()
-
-        return self.route
+        print("Route:",self.route)
+        print("------------------")
+        # remove duplicates
+        for i in range(len(self.route)):
+            for j in range(i+1,len(self.route)):
+                if self.route[i][1] == self.route[j][2] and self.route[i][2] == self.route[j][1]:
+                    self.route.remove(self.route[j])
+        return list(set(self.route))
     
     def get_cargos(self):
         cargos =[]
@@ -71,6 +77,10 @@ class RouteFinderV2:
             for cargo in cc:
                 cargos.append(cargo)
 
+        #initail_cargos = self.db.searchCargobySourceIDandDestinationID(self.sourceNode.ID,self.destNode.ID)
+        #cargos.extend(initail_cargos)
+        # eliminate duplicates in cargos dict
+        print("Cargos:",cargos)
         for cargo in cargos:
             print(cargo)
         return cargos

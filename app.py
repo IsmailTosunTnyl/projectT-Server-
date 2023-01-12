@@ -2,7 +2,8 @@ from flask import Flask, request
 from flask_restful import Api, Resource
 from DataBase import DB
 import RouteFinder as rf
-import RouteFinderV2 
+import RouteFinderV2
+import time
 
 app = Flask(__name__)
 api = Api(app)
@@ -91,7 +92,7 @@ class Cargoo(Resource):
                         Volume, NodeID, DestNodeID, Status, Value)
             return {"ok": {"Cargo added": '201'}}, 201
         except Exception as e:
-            return {"error", {"Cargo added": str(e)}}, 500
+            return  500
 
 
 class CargooListAll(Resource):
@@ -331,7 +332,7 @@ class driverTakeCargo(Resource):
             boxID = cargo['BoxID']
             if (user['ID'] == cargo['DriverID']):
                 db.updateNodeandBox(NodeID, boxID, 1)
-                db.updateCargoStatus(cargoID, 'transporting')
+                #db.updateCargoStatus(cargoID, 'transporting')
                 # update box
                 db.updateBoxStatus(boxID, 0)
                 return {"ok": {'Box Opened': boxID}}, 201
@@ -347,6 +348,7 @@ class driverTakeCargo(Resource):
             boxID = cargo['BoxID']
             if (user['ID'] == cargo['DriverID']):
                 db.updateNodeandBox(NodeID, boxID, 2)
+                time.sleep(6)
                 db.updateCargoStatus(cargoID, 'transporting')
                 # update box
                 db.updateBoxStatus(boxID, 0)

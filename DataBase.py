@@ -136,9 +136,13 @@ class DB():
         """check if node is in database Node itself use this function"""
 
         mycursor = self.mydb.cursor(dictionary=True)
-        mycursor.execute("SELECT * FROM nodeControl WHERE NodeID = %s or destNodeID=%s", (NodeID,NodeID))
-        myresult = mycursor.fetchall()
-        return myresult
+        mycursor.execute("SELECT * FROM nodeControl2 WHERE (NodeID = %s and (Status=%s or Status=%s or Status=%s or Status=%s))", (NodeID,'startbox','readyforDTS','readyfordrop','readyfordriver'))
+        myresult1 = mycursor.fetchall()
+        mycursor.execute("SELECT * FROM nodeControl2 WHERE destNodeID = %s and (Status=%s or Status=%s)", (NodeID,'endbox','transporting'))
+        myresult2 = mycursor.fetchall()
+        
+        result = myresult1 + myresult2
+        return result
 
     def updateNodeandBox(self,NodeID,BoxID,BoxStatus,isdestNode=False):
         if isdestNode:
@@ -261,7 +265,7 @@ if __name__=="__main__":
     #db.cargoAdd(22,22,'food',35,3535,2,'startbox',1000)
     #print(len(db.listCargosinNodes(2)))
     #print(db.searchNodeByID_tpl(2))
-    print(db.searchCargobySourceIDandDestinationID(3,20))
+    #print(db.searchCargobySourceIDandDestinationID(3,20))
     #db.updateNode(1,1,0)
     #print(db.searchUserbyEmail("mail60")['ID'])
     #print(db.getCargoByID(26))
@@ -270,3 +274,5 @@ if __name__=="__main__":
     #print(db.checkNodes(3))
     #print(db.getCargobyDriverID(72,"transporting"))
     #print(db.updatedestNodeandBox(3,1,2))
+    print(db.searchUserbyEmail("mail60")['ID'])
+    print(db.searchUserbyEmail("mail60")['ID'])
