@@ -276,5 +276,7 @@ if __name__=="__main__":
     #print(db.checkNodes(3))
     #print(db.getCargobyDriverID(72,"transporting"))
     #print(db.updatedestNodeandBox(3,1,2))
-    print(db.searchUserbyEmail("mail60")['ID'])
-    print(db.searchUserbyEmail("mail60")['ID'])
+    #print(db.searchUserbyEmail("mail60")['ID'])
+    #print(db.searchUserbyEmail("mail60")['ID'])
+    print(db.signUp(334324234,"mail@mailsss","3435eg","name","surname60",34534536,"address60",555,2))
+    #NationalId, Mail, Password, Name, LastName, Phone, Adress, Balance, Star
