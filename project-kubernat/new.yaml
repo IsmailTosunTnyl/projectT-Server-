@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: projectt
+  labels:
+    app: projectt
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: projectt
+  template:
+    metadata:
+      labels:
+        app: projectt
+    spec:
+      containers:
+      - name: projectt
+        image: ismailtosun/projectt:V1.5
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80

@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: projectt-service
+  annotations:
+    service.beta.kubernetes.io/linode-loadbalancer-throttle: "4"
+  labels:
+    app: projectt-service
+spec:
+  type: LoadBalancer
+  ports:
+  - name: http
+    port: 8080
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: projectt
+  sessionAffinity: None

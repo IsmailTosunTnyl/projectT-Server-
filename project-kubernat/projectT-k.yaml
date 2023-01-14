@@ -1,0 +1,23 @@
+apiVersion: batch/v1
+kind: Deployment
+metadata:
+  name: ProjectT
+  labels:
+    app: projectt
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: projectt
+  template:
+    metadata:
+      labels:
+        app: projectt
+    spec:
+      containers:
+      - name: projectt
+        image: localdocker/projectt:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 80
+      restartPolicy: Always
